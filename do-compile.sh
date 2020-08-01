@@ -54,6 +54,10 @@ compile_config () {
     pushd "$install_prefix"
         tar -c -f "$dist_path" --zstd -v .
     popd
+
+    # cleanup
+    rm -rf "$install_prefix"
+    rm -rf "$tmpdir"
 }
 
 prepare_install_prefix () {
