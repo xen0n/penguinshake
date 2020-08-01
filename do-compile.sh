@@ -52,7 +52,7 @@ compile_config () {
 
     # package
     pushd "$install_prefix"
-        tar -c -f "$dist_path" --zstd -v .
+        tar -c -f "$dist_path" --zstd -v --owner root:0 .
     popd
 
     # cleanup
@@ -63,6 +63,7 @@ compile_config () {
 prepare_install_prefix () {
     local prefix="$1"
 
+    chmod 0755 "$prefix"
     mkdir -p "$prefix/boot"
     mkdir -p "$prefix/lib/modules"
 }
