@@ -37,7 +37,10 @@ compile_config () {
     cp "$config_path" "$tmpdir/.config"
 
     pushd "$SOURCE"
+        # sync config and copy back if changed
         make -j "$JOBS" O="$tmpdir" ARCH="$ARCH" CROSS_COMPILE="$CROSS_COMPILE" CC="$CC" syncconfig
+        cmp "$config_path" "$tmpdir/.config" || cp "$tmpdir/.config" "${config_path}.new"
+
         time make -j "$JOBS" O="$tmpdir" ARCH="$ARCH" CROSS_COMPILE="$CROSS_COMPILE" CC="$CC"
 
         # assemble dist root
