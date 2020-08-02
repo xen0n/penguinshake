@@ -50,8 +50,8 @@ compile_config () {
         make -j "$JOBS" O="$tmpdir" ARCH="$ARCH" CROSS_COMPILE="$CROSS_COMPILE" CC="$CC" INSTALL_PATH="$install_path" INSTALL_MOD_PATH="$install_prefix" install modules_install
     popd
 
-    # remove cruft
-    rm -f "$install_path/vmlinux-"*
+    # remove vmlinux if vmlinuz is found
+    find "$install_path" -type f -name 'vmlinuz-*' > /dev/null && rm -f "$install_path/vmlinux-"*
 
     # package
     pushd "$install_prefix"
