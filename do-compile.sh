@@ -52,7 +52,7 @@ compile_config () {
 
     # package
     pushd "$install_prefix"
-        tar -c -f "$dist_path" --zstd -v --owner root:0 .
+        tar -c -f "$dist_path" --zstd -v --owner root:0 --group root:0 .
     popd
 
     # cleanup
