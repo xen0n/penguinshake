@@ -16,7 +16,6 @@ compile_config () {
     local config_name="$1"
     local config_path="$my_dir/configs/$config_name.config"
     local env_path="$my_dir/env/$config_name"
-    local dist_path="$my_dir/dist/$config_name.tar.zst"
 
     . "$env_path"
     : "${ARCH:?ARCH must be set}"
@@ -28,9 +27,11 @@ compile_config () {
     local tmpdir="$(mktemp --tmpdir -d penguinshake.$config_name.XXXXXX)"
     local install_prefix="$(mktemp --tmpdir -d penguinshakedist.$config_name.XXXXXX)"
     local install_path="$install_prefix/boot"
+    local commit_hash="$(get_commit_hash "$SOURCE")"
+    local dist_path="$my_dir/dist/$config_name.$commit_hash.tar.zst"
 
     echo "Compiling config $config_name (ARCH=$ARCH)"
-    echo "SOURCE=$SOURCE"
+    echo "SOURCE=$SOURCE (commit $commit_hash)"
     echo "TMPDIR=$tmpdir"
     echo "INSTALL_PREFIX=$install_prefix"
 
@@ -72,5 +73,10 @@ prepare_install_prefix () {
     mkdir -p "$prefix/lib/modules"
 }
 
+get_commit_hash () {
+    local srcdir="$1"
+
+    ( cd "$srcdir" && git rev-parse HEAD )
+}
 
 main "$@"
