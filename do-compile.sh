@@ -38,6 +38,7 @@ compile_config () {
 
     pushd "$SOURCE"
         # sync config and copy back if changed
+        [[ "x$MENUCONFIG" != "x" ]] && make -j "$JOBS" O="$tmpdir" ARCH="$ARCH" CROSS_COMPILE="$CROSS_COMPILE" CC="$CC" menuconfig
         make -j "$JOBS" O="$tmpdir" ARCH="$ARCH" CROSS_COMPILE="$CROSS_COMPILE" CC="$CC" syncconfig
         cmp "$config_path" "$tmpdir/.config" || cp "$tmpdir/.config" "${config_path}.new"
 
