@@ -24,11 +24,26 @@ compile_config () {
     : "${SOURCE:?SOURCE must be set}"
     : "${JOBS:?JOBS must be set}"
 
-    local tmpdir="$(mktemp --tmpdir -d penguinshake.$config_name.XXXXXX)"
+    local keep_sources
+    if [[ "x$KEEP_SOURCES" != x ]]; then
+        keep_sources=true
+    else
+        keep_sources=false
+    fi
+
+    local tmpdir
+    if ! "$keep_sources"; then
+        tmpdir="$(mktemp --tmpdir -d penguinshake.$config_name.XXXXXX)"
+    else
+        tmpdir="/tmp/penguinshake.$config_name"
+        [[ -d "$tmpdir" ]] || mkdir -p "$tmpdir"
+    fi
+
     local install_prefix="$(mktemp --tmpdir -d penguinshakedist.$config_name.XXXXXX)"
     local install_path="$install_prefix/boot"
     local commit_hash="$(get_commit_hash "$SOURCE")"
-    local dist_path="$my_dir/dist/$config_name.$commit_hash.tar.zst"
+    local dist_relpath="dist/$config_name.$commit_hash.tar.zst"
+    local dist_path="$my_dir/$dist_relpath"
 
     echo "Compiling config $config_name (ARCH=$ARCH)"
     echo "SOURCE=$SOURCE (commit $commit_hash)"
@@ -62,7 +77,13 @@ compile_config () {
 
     # cleanup
     rm -rf "$install_prefix"
-    rm -rf "$tmpdir"
+    if ! "$keep_sources"; then
+        rm -rf "$tmpdir"
+    fi
+
+    echo
+    echo "Successfully built $dist_relpath"
+    echo
 }
 
 prepare_install_prefix () {
