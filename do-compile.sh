@@ -68,7 +68,10 @@ compile_config () {
     popd
 
     # remove vmlinux if vmlinuz is found
-    find "$install_path" -type f -name 'vmlinuz-*' > /dev/null && rm -f "$install_path/vmlinux-"*
+    local has_vmlinuz="$(find "$install_path" -type f -name 'vmlinuz-*' | wc -l)"
+    if [[ "$has_vmlinuz" -ne 0 ]]; then
+        rm -f "$install_path/vmlinux-"*
+    fi
 
     # package
     pushd "$install_prefix"
