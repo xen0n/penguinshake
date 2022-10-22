@@ -31,6 +31,11 @@ compile_config () {
         keep_sources=false
     fi
 
+    local merge_usr=false
+    if [[ -n $MERGE_USR ]]; then
+        merge_usr=true
+    fi
+
     local tmpdir
     if ! "$keep_sources"; then
         tmpdir="$(mktemp --tmpdir -d penguinshake.$config_name.XXXXXX)"
@@ -44,6 +49,11 @@ compile_config () {
     local commit_hash="$(get_commit_hash "$SOURCE")"
     local dist_relpath="dist/$config_name.$commit_hash.tar.zst"
     local dist_path="$my_dir/$dist_relpath"
+    local install_mod_path="$install_prefix"
+
+    if $merge_usr; then
+        install_mod_path="$install_mod_path/usr"
+    fi
 
     echo "Compiling config $config_name (ARCH=$ARCH)"
     echo "SOURCE=$SOURCE (commit $commit_hash)"
@@ -61,10 +71,10 @@ compile_config () {
         time make -j "$JOBS" O="$tmpdir" ARCH="$ARCH" CROSS_COMPILE="$CROSS_COMPILE" CC="$CC"
 
         # assemble dist root
-        prepare_install_prefix "$install_prefix"
+        prepare_install_prefix "$install_prefix" "$merge_usr"
 
         # dist
-        make -j "$JOBS" O="$tmpdir" ARCH="$ARCH" CROSS_COMPILE="$CROSS_COMPILE" CC="$CC" INSTALL_PATH="$install_path" INSTALL_MOD_PATH="$install_prefix" install modules_install
+        make -j "$JOBS" O="$tmpdir" ARCH="$ARCH" CROSS_COMPILE="$CROSS_COMPILE" CC="$CC" INSTALL_PATH="$install_path" INSTALL_MOD_PATH="$install_mod_path" install modules_install
     popd
 
     # remove vmlinux if vmlinuz is found
@@ -91,10 +101,15 @@ compile_config () {
 
 prepare_install_prefix () {
     local prefix="$1"
+    local merge_usr="$2"
 
     chmod 0755 "$prefix"
     mkdir -p "$prefix/boot"
-    mkdir -p "$prefix/lib/modules"
+    if $merge_usr; then
+        mkdir -p "$prefix/usr/lib/modules"
+    else
+        mkdir -p "$prefix/lib/modules"
+    fi
 }
 
 get_commit_hash () {
