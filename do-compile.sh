@@ -6,18 +6,22 @@ my_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 
 main () {
-    local config_name="$1"
+    local env_name="$1"
 
-    compile_config "$config_name"
+    compile_config "$env_name"
 }
 
 
 compile_config () {
-    local config_name="$1"
-    local config_path="$my_dir/configs/$config_name.config"
-    local env_path="$my_dir/env/$config_name"
+    local env_name="$1"
+    local env_path="$my_dir/env/$env_name"
 
     . "$env_path"
+
+    local config_name="$1"
+    [[ -n $USE_CONFIG ]] && config_name="$USE_CONFIG"
+    local config_path="$my_dir/configs/$config_name.config"
+
     : "${ARCH:?ARCH must be set}"
     : "${SOURCE:?SOURCE must be set}"
     : "${JOBS:?JOBS must be set}"
