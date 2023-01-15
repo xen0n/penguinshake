@@ -27,17 +27,11 @@ compile_config () {
         : "${CC:?CC must be set}"
     fi
 
-    local keep_sources
-    if [[ "x$KEEP_SOURCES" != x ]]; then
-        keep_sources=true
-    else
-        keep_sources=false
-    fi
+    local keep_sources=false
+    [[ -n $KEEP_SOURCES ]] && keep_sources=true
 
     local merge_usr=false
-    if [[ -n $MERGE_USR ]]; then
-        merge_usr=true
-    fi
+    [[ -n $MERGE_USR ]] && merge_usr=true
 
     local tmpdir
     if ! "$keep_sources"; then
@@ -54,9 +48,7 @@ compile_config () {
     local dist_path="$my_dir/$dist_relpath"
     local install_mod_path="$install_prefix"
 
-    if $merge_usr; then
-        install_mod_path="$install_mod_path/usr"
-    fi
+    "$merge_usr" && install_mod_path="$install_mod_path/usr"
 
     local make_args=(
         -j "$JOBS"
@@ -78,7 +70,7 @@ compile_config () {
 
     pushd "$SOURCE"
         # sync config and copy back if changed
-        [[ "x$MENUCONFIG" != "x" ]] && make "${make_args[@]}" menuconfig
+        [[ -n $MENUCONFIG ]] && make "${make_args[@]}" menuconfig
         make "${make_args[@]}" syncconfig
         cmp "$config_path" "$tmpdir/.config" || cp "$tmpdir/.config" "${config_path}.new"
 
@@ -104,9 +96,7 @@ compile_config () {
 
     # cleanup
     rm -rf "$install_prefix"
-    if ! "$keep_sources"; then
-        rm -rf "$tmpdir"
-    fi
+    "$keep_sources" || rm -rf "$tmpdir"
 
     echo
     echo "Successfully built $dist_relpath"
