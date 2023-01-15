@@ -19,10 +19,13 @@ compile_config () {
 
     . "$env_path"
     : "${ARCH:?ARCH must be set}"
-    : "${CROSS_COMPILE:?CROSS_COMPILE must be set}"
-    : "${CC:?CC must be set}"
     : "${SOURCE:?SOURCE must be set}"
     : "${JOBS:?JOBS must be set}"
+
+    if [[ -z $LLVM ]]; then
+        : "${CROSS_COMPILE:?CROSS_COMPILE must be set}"
+        : "${CC:?CC must be set}"
+    fi
 
     local keep_sources
     if [[ "x$KEEP_SOURCES" != x ]]; then
@@ -59,14 +62,17 @@ compile_config () {
         -j "$JOBS"
         O="$tmpdir"
         ARCH="$ARCH"
-        CROSS_COMPILE="$CROSS_COMPILE"
-        CC="$CC"
     )
+
+    [[ -n $LLVM ]] && make_args+=( LLVM="$LLVM" )
+    [[ -n $CROSS_COMPILE ]] && make_args+=( CROSS_COMPILE="$CROSS_COMPILE" )
+    [[ -n $CC ]] && make_args+=( CC="$CC" )
 
     echo "Compiling config $config_name (ARCH=$ARCH)"
     echo "SOURCE=$SOURCE (commit $commit_hash)"
     echo "TMPDIR=$tmpdir"
     echo "INSTALL_PREFIX=$install_prefix"
+    echo "make args:" "${make_args[@]}"
 
     cp "$config_path" "$tmpdir/.config"
 
