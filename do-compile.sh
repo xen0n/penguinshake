@@ -55,6 +55,14 @@ compile_config () {
         install_mod_path="$install_mod_path/usr"
     fi
 
+    local make_args=(
+        -j "$JOBS"
+        O="$tmpdir"
+        ARCH="$ARCH"
+        CROSS_COMPILE="$CROSS_COMPILE"
+        CC="$CC"
+    )
+
     echo "Compiling config $config_name (ARCH=$ARCH)"
     echo "SOURCE=$SOURCE (commit $commit_hash)"
     echo "TMPDIR=$tmpdir"
@@ -64,17 +72,17 @@ compile_config () {
 
     pushd "$SOURCE"
         # sync config and copy back if changed
-        [[ "x$MENUCONFIG" != "x" ]] && make -j "$JOBS" O="$tmpdir" ARCH="$ARCH" CROSS_COMPILE="$CROSS_COMPILE" CC="$CC" menuconfig
-        make -j "$JOBS" O="$tmpdir" ARCH="$ARCH" CROSS_COMPILE="$CROSS_COMPILE" CC="$CC" syncconfig
+        [[ "x$MENUCONFIG" != "x" ]] && make "${make_args[@]}" menuconfig
+        make "${make_args[@]}" syncconfig
         cmp "$config_path" "$tmpdir/.config" || cp "$tmpdir/.config" "${config_path}.new"
 
-        time make -j "$JOBS" O="$tmpdir" ARCH="$ARCH" CROSS_COMPILE="$CROSS_COMPILE" CC="$CC"
+        time make "${make_args[@]}"
 
         # assemble dist root
         prepare_install_prefix "$install_prefix" "$merge_usr"
 
         # dist
-        make -j "$JOBS" O="$tmpdir" ARCH="$ARCH" CROSS_COMPILE="$CROSS_COMPILE" CC="$CC" INSTALL_PATH="$install_path" INSTALL_MOD_PATH="$install_mod_path" install modules_install
+        make "${make_args[@]}" INSTALL_PATH="$install_path" INSTALL_MOD_PATH="$install_mod_path" install modules_install
     popd
 
     # remove vmlinux if vmlinuz is found
