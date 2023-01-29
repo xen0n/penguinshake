@@ -61,6 +61,7 @@ compile_config () {
     )
 
     [[ -n $LLVM ]] && make_args+=( LLVM="$LLVM" )
+    [[ -n $LLVM_IAS ]] && make_args+=( LLVM_IAS="$LLVM_IAS" )
     [[ -n $CROSS_COMPILE ]] && make_args+=( CROSS_COMPILE="$CROSS_COMPILE" )
     [[ -n $CC ]] && make_args+=( CC="$CC" )
 
