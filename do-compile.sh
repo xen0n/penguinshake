@@ -64,6 +64,7 @@ compile_config () {
     [[ -n $LLVM_IAS ]] && make_args+=( LLVM_IAS="$LLVM_IAS" )
     [[ -n $CROSS_COMPILE ]] && make_args+=( CROSS_COMPILE="$CROSS_COMPILE" )
     [[ -n $CC ]] && make_args+=( CC="$CC" )
+    [[ -n $V ]] && make_args+=( V="$V" )
 
     echo "Compiling config $config_name (ARCH=$ARCH)"
     echo "SOURCE=$SOURCE (commit $commit_hash)"
